@@ -1,42 +1,27 @@
 import Head from "next/head";
 import Image from "next/image";
-import { GetStaticProps, GetStaticPropsResult } from "next";
-import { FC } from "react";
 
 // Components
 
 import Banner from "@/components/banner/banner.component";
 import Card from "@/components/card/card.component";
 
+import { fetchCoffeeStores } from "../../lib/coffee-stores";
+
 // styles
 import styles from "@/styles/Home.module.css";
 
-// Data
+export const getStaticProps = async (context) => {
+    const data = await fetchCoffeeStores();
 
-import coffeeStoreData from "../../data/coffee-stores.json";
-
-type CoffeStore = {
-    id: number;
-    name: string;
-    imgUrl: string;
-    websiteUrl: string;
-    address: string;
-    neighbourhood: string;
-};
-
-type PropType = {
-    coffeeStore: CoffeStore[];
-};
-
-export const getStaticProps: GetStaticProps = async (context) => {
     return {
         props: {
-            coffeeStore: coffeeStoreData,
+            coffeeStore: data,
         },
     };
 };
 
-export default function Home(props: PropType) {
+export default function Home(props) {
     const { coffeeStore } = props;
     const handleOnBannerBtnClick = () => {
         console.log("Banner button had been clicked");
@@ -75,11 +60,14 @@ export default function Home(props: PropType) {
                             {coffeeStore.map((store) => {
                                 return (
                                     <Card
-                                        key={store.id}
+                                        key={store.fsq_id}
                                         className={styles.card}
                                         name={store.name}
-                                        imgUrl={store.imgUrl}
-                                        href={`/coffee-store/${store.id}`}
+                                        imgUrl={
+                                            store.imgUrl ||
+                                            "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80"
+                                        }
+                                        href={`/coffee-store/${store.fsq_id}`}
                                     />
                                 );
                             })}
