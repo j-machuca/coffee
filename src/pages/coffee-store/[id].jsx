@@ -16,7 +16,7 @@ export async function getStaticProps(staticProps) {
     return {
         props: {
             coffeeStore: data.find((coffeeStore) => {
-                return coffeeStore.fsq_id.toString() === params.id; //dynamic id
+                return coffeeStore.id.toString() === params.id; //dynamic id
             }),
         },
     };
@@ -26,7 +26,7 @@ export async function getStaticPaths() {
     const data = await fetchCoffeeStores();
 
     const paths = data.map((coffeeStore) => {
-        return { params: { id: coffeeStore.fsq_id.toString() } };
+        return { params: { id: coffeeStore.id.toString() } };
     });
 
     return {
@@ -43,7 +43,7 @@ const CoffeeStoreDetail = (props) => {
         return <div>Loading</div>;
     }
 
-    const { name, location, imgUrl } = props.coffeeStore;
+    const { name, address, locality, imgUrl } = props.coffeeStore;
 
     const handleUpvoteButton = () => {
         console.log("handle upvote");
@@ -58,7 +58,7 @@ const CoffeeStoreDetail = (props) => {
                 <div className={styles.col1}>
                     <div className={styles.backToHomeLink}>
                         <Link className="" href="/">
-                            Back to home page
+                            ← Back to home page
                         </Link>
                     </div>
                     <div className={styles.nameWrapper}>
@@ -76,24 +76,30 @@ const CoffeeStoreDetail = (props) => {
                     />
                 </div>
                 <div className={cls("glass", styles.col2)}>
-                    <div className={styles.iconWrapper}>
-                        <Image
-                            src="/static/img/places.svg"
-                            width={24}
-                            height={24}
-                            alt="icon"
-                        />
-                        <p className={styles.text}>{location.address}</p>
-                    </div>
-                    <div className={styles.iconWrapper}>
-                        <Image
-                            src="/static/img/nearMe.svg"
-                            width={24}
-                            height={24}
-                            alt="icon"
-                        />
-                        <p className={styles.text}>{location.locality}</p>
-                    </div>
+                    {address && (
+                        <div className={styles.iconWrapper}>
+                            <Image
+                                src="/static/img/places.svg"
+                                width={24}
+                                height={24}
+                                alt="icon"
+                            />
+                            <p className={styles.text}>{address}</p>
+                        </div>
+                    )}
+
+                    {locality && (
+                        <div className={styles.iconWrapper}>
+                            <Image
+                                src="/static/img/nearMe.svg"
+                                width={24}
+                                height={24}
+                                alt="icon"
+                            />
+                            <p className={styles.text}>{locality}</p>
+                        </div>
+                    )}
+
                     <div className={styles.iconWrapper}>
                         <Image
                             src="/static/img/star.svg"
