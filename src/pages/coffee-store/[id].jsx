@@ -13,11 +13,13 @@ export async function getStaticProps(staticProps) {
 
     const data = await fetchCoffeeStores();
 
+    const findCoffeeStoreById = data.find((coffeeStore) => {
+        return coffeeStore.id.toString() === params.id; //dynamic id
+    });
+
     return {
         props: {
-            coffeeStore: data.find((coffeeStore) => {
-                return coffeeStore.id.toString() === params.id; //dynamic id
-            }),
+            coffeeStore: findCoffeeStoreById ? findCoffeeStoreById : {},
         },
     };
 }
@@ -31,7 +33,7 @@ export async function getStaticPaths() {
 
     return {
         paths,
-        fallback: false,
+        fallback: true,
     };
 }
 
