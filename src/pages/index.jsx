@@ -12,7 +12,7 @@ import { fetchCoffeeStores } from "../../lib/coffee-stores";
 import styles from "@/styles/Home.module.css";
 import useTrackLocation from "../../hooks/useTrackLocations";
 import { useContext, useEffect, useState } from "react";
-import { ACTION_TYPES, StoreContext } from "./_app";
+import { ACTION_TYPES, StoreContext } from "../../store/storeContext";
 
 export const getStaticProps = async (context) => {
     const data = await fetchCoffeeStores();
@@ -45,15 +45,16 @@ export default function Home(props) {
             console.log(latLng);
             if (latLng) {
                 try {
-                    const fetchedCoffeeStores = await fetchCoffeeStores(
-                        latLng,
-                        6
+                    const response = await fetch(
+                        `/api/getCoffeeStoreByLocation?latLong=${latLng}&limit=30`
                     );
-                    console.log({ fetchedCoffeeStores });
+
+                    const coffeeStores = await response.json();
+
                     // setCoffeeStores(fetchedCoffeeStores);
                     dispatch({
                         type: ACTION_TYPES.SET_COFFEE_STORES,
-                        payload: { coffeeStores: fetchedCoffeeStores },
+                        payload: { coffeeStores },
                     });
                 } catch (error) {
                     //set error
@@ -62,7 +63,7 @@ export default function Home(props) {
             }
         }
         setCoffeeStoresByLocation();
-    }, [latLng]);
+    }, [latLng, dispatch]);
 
     const handleOnBannerBtnClick = () => {
         console.log("Banner button had been clicked");

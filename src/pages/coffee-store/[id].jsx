@@ -7,6 +7,9 @@ import cls from "classnames";
 import Image from "next/image";
 
 import { fetchCoffeeStores } from "../../../lib/coffee-stores";
+import { useContext, useEffect, useState } from "react";
+import { StoreContext } from "../../../store/storeContext";
+import { isEmpty } from "../../../utils";
 
 export async function getStaticProps(staticProps) {
     const params = staticProps.params;
@@ -37,15 +40,32 @@ export async function getStaticPaths() {
     };
 }
 
-const CoffeeStoreDetail = (props) => {
+const CoffeeStoreDetail = (initialProps) => {
     const router = useRouter();
     const { id } = router.query;
+
+    const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+
+    const {
+        state: { coffeeStores },
+    } = useContext(StoreContext);
+
+    useEffect(() => {
+        if (isEmpty(initialProps.coffeeStore)) {
+            if (coffeeStore.length > 0) {
+                const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+                    return coffeeStore.id.toString() === id; //dynamic id
+                });
+                setCoffeeStore(findCoffeeStoreById);
+            }
+        }
+    }, [id, initialProps.coffeeStore, coffeeStores, coffeeStore.length]);
 
     if (router.isFallback) {
         return <div>Loading</div>;
     }
 
-    const { name, address, locality, imgUrl } = props.coffeeStore;
+    const { name, address, locality, imgUrl } = coffeeStore;
 
     const handleUpvoteButton = () => {
         console.log("handle upvote");
