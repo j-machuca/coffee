@@ -50,16 +50,46 @@ const CoffeeStoreDetail = (initialProps) => {
         state: { coffeeStores },
     } = useContext(StoreContext);
 
+    const handleCreateCoffeeStore = async (coffeeStore) => {
+        try {
+            const response = await fetch("/api/createCoffeeStore", {
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify(coffeeStore),
+            });
+
+            const dbCoffeeStore = response.json();
+            console.log(dbCoffeeStore);
+        } catch (err) {
+            console.error("Error creating coffee store", err);
+        }
+    };
+
     useEffect(() => {
         if (isEmpty(initialProps.coffeeStore)) {
             if (coffeeStore.length > 0) {
-                const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
-                    return coffeeStore.id.toString() === id; //dynamic id
-                });
-                setCoffeeStore(findCoffeeStoreById);
+                const coffeeStoreFromContext = coffeeStores.find(
+                    (coffeeStore) => {
+                        return coffeeStore.id.toString() === id; //dynamic id
+                    }
+                );
+                if (coffeeStoreFromContext) {
+                    setCoffeeStore(coffeeStoreFromContext);
+                    handleCreateCoffeeStore(coffeeStore);
+                }
             }
+        } else {
+            handleCreateCoffeeStore(initialProps.coffeeStore);
         }
-    }, [id, initialProps.coffeeStore, coffeeStores, coffeeStore.length]);
+    }, [
+        id,
+        initialProps.coffeeStore,
+        coffeeStores,
+        coffeeStore.length,
+        coffeeStore,
+    ]);
 
     if (router.isFallback) {
         return <div>Loading</div>;

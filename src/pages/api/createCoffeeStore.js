@@ -1,9 +1,4 @@
-import Airtable from "airtable";
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
-    process.env.AIRTABLE_BASE_KEY
-);
-
-const table = base("coffee-stores");
+import { getRecords, table } from "../../../lib/airtable";
 
 const createCoffeeStore = async (req, res) => {
     if (req.method === "POST") {
@@ -11,24 +6,24 @@ const createCoffeeStore = async (req, res) => {
 
         try {
             if (id) {
+                // If there is an ID in request fetch it from the DB
+
                 const findCoffeeStoreRecords = await table
                     .select({
                         filterByFormula: `id=${id}`,
                     })
                     .firstPage();
 
-                console.log({ findCoffeeStoreRecords });
-
+                // Check DB if record exist and return
                 if (findCoffeeStoreRecords.length !== 0) {
-                    const records = findCoffeeStoreRecords.map((record) => {
-                        return {
-                            ...record.fields,
-                        };
-                    });
-                    res.json(records);
+                    const records = getRecords(findCoffeeStoreRecords);
+
+                    return res.json(records);
                 } else {
                     //create a record
+
                     if (name) {
+                        console.log("4");
                         const createRecords = await table.create([
                             {
                                 fields: {
@@ -42,26 +37,27 @@ const createCoffeeStore = async (req, res) => {
                             },
                         ]);
 
-                        const records = createRecords.map((record) => {
-                            return {
-                                ...record.fields,
-                            };
-                        });
-                        res.json(records);
+                        const records = getRecords(createRecords);
+
+                        return res.json(records);
                     } else {
-                        res.status(400);
-                        res.json({ message: "Id or name is missing" });
+                        return res
+                            .status(400)
+                            .json({ message: "Id or name is missing" });
                     }
                 }
             } else {
-                res.status(400);
-                res.json({ message: "Id is missing" });
+                return res.status(400).json({ message: "Id is missing" });
             }
         } catch (err) {
             console.error("Error creating or finding a store", err);
-            res.status(500);
-            res.json({ message: "Error creating or finding a store", err });
+            return res.status(500).json({
+                message: "Error creating or finding a store",
+                err,
+            });
         }
+    } else {
+        return res.status(400).json({ message: "Method is not Allowed" });
     }
 };
 
